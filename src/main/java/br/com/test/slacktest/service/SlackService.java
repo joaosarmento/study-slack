@@ -1,5 +1,7 @@
 package br.com.test.slacktest.service;
 
+import br.com.test.slacktest.DTO.SendMessageDTO;
+import br.com.test.slacktest.DTO.UsernameDTO;
 import com.slack.api.Slack;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
@@ -9,6 +11,7 @@ import com.slack.api.model.User;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 import java.io.IOException;
@@ -67,15 +70,48 @@ public class SlackService {
         return usersList;
     }
 
-    public void sendMessageToSlack() throws SlackApiException, IOException {
+    public String findUserId(String username) {
+        var client = Slack.getInstance().methods();
+        var logger = LoggerFactory.getLogger("test-app");
+
+        try {
+            var result = client.usersList(r -> r.token(token));
+
+            for (User user : result.getMembers()) {
+                if(user.getName().equals(username)) return user.getId();
+            }
+        } catch (IOException | SlackApiException e) {
+            logger.error("error: {}", e.getMessage(), e);
+        }
+        return "Não Encontrado";
+    }
+
+    public String findConversationId(String channelName) {
+        var client = Slack.getInstance().methods();
+        var logger = LoggerFactory.getLogger("test-app");
+
+        try {
+            var result = client.conversationsList(r -> r
+                    .token(token)
+            );
+            for (Conversation conversation : result.getChannels()) {
+                if(conversation.getName().equals(channelName)) return conversation.getId();
+            }
+        } catch (IOException | SlackApiException e) {
+            logger.error("error: {}", e.getMessage(), e);
+        }
+        return "Não Encontrado";
+    }
+
+    public void sendMessageToSlack(SendMessageDTO sendMessageDTO) throws SlackApiException, IOException {
         var config = new AppConfig();
         config.setSingleTeamBotToken(token);
         config.setSigningSecret(signinSecret);
         var app = new App(config);
 
         app.client().chatPostMessage(r -> r
-                .channel(channelId)
-                .text("Oi galera!")
+                .channel(sendMessageDTO.getChannel())
+                .text(sendMessageDTO.getMessage())
         );
     }
 
@@ -95,5 +131,17 @@ public class SlackService {
                                 )))
                 ))
         );
+    }
+
+    public void sendMessageToUsername(SendMessageDTO sendMessageDTO) throws SlackApiException, IOException {
+        String id = findUserId(sendMessageDTO.getChannel());
+        sendMessageDTO.setChannel(id);
+        sendMessageToSlack(sendMessageDTO);
+    }
+
+    public void sendMessageToConversation(SendMessageDTO sendMessageDTO) throws SlackApiException, IOException {
+        String id = findConversationId(sendMessageDTO.getChannel());
+        sendMessageDTO.setChannel(id);
+        sendMessageToSlack(sendMessageDTO);
     }
 }
