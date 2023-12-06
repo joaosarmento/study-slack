@@ -1,7 +1,8 @@
 package br.com.test.slacktest.controller;
 
+import br.com.test.slacktest.DTO.ConversationDTO;
 import br.com.test.slacktest.DTO.SendMessageDTO;
-import br.com.test.slacktest.DTO.UsernameDTO;
+import br.com.test.slacktest.DTO.UserDTO;
 import br.com.test.slacktest.service.SlackService;
 import com.slack.api.methods.SlackApiException;
 import org.springframework.web.bind.annotation.*;
@@ -30,13 +31,13 @@ public class SlackController {
     }
 
     @GetMapping("/user-id")
-    public String getUserIdByName(@RequestBody UsernameDTO usernameDTO){
-        return slackService.findUserId(usernameDTO.getName());
+    public String getUserIdByName(@RequestBody UserDTO userDTO){
+        return slackService.findUserId(userDTO.getName());
     }
 
-    @GetMapping("/conversations-id")
-    public String getConversationIdByName(@RequestBody UsernameDTO usernameDTO){
-        return slackService.findConversationId(usernameDTO.getName());
+    @GetMapping("/conversation-id")
+    public String getConversationIdByName(@RequestBody ConversationDTO conversationDTO){
+        return slackService.findConversationId(conversationDTO.getName());
     }
 
     @PostMapping("/message")
@@ -45,17 +46,17 @@ public class SlackController {
     }
 
     @PostMapping("/button")
-    public void sendButtonMessage() throws SlackApiException, IOException {
-        slackService.sendButtonMessageToSlack();
+    public void sendButtonMessage(@RequestBody SendMessageDTO sendMessageDTO) throws SlackApiException, IOException {
+        slackService.sendButtonMessageToSlack(sendMessageDTO);
     }
 
     @PostMapping("/message-to-user")
-    public void sendMessageToUsername(@RequestBody SendMessageDTO sendMessageDTO) throws SlackApiException, IOException {
-        slackService.sendMessageToUsername(sendMessageDTO);
+    public void sendMessageToUsername(@RequestBody UserDTO userDTO) throws SlackApiException, IOException {
+        slackService.sendMessageToUsername(userDTO);
     }
 
     @PostMapping("/message-to-conversation")
-    public void sendMessageToConversation(@RequestBody SendMessageDTO sendMessageDTO) throws SlackApiException, IOException {
-        slackService.sendMessageToConversation(sendMessageDTO);
+    public void sendMessageToConversation(@RequestBody ConversationDTO conversationDTO) throws SlackApiException, IOException {
+        slackService.sendMessageToConversation(conversationDTO);
     }
 }

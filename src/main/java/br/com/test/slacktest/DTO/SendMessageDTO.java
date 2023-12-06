@@ -2,18 +2,21 @@ package br.com.test.slacktest.DTO;
 
 public class SendMessageDTO {
 
-    String channel;
+    String id;
     String message;
 
-    public void setChannel(String channel) {
-        this.channel = channel;
+    public SendMessageDTO(String id, String message){
+        this.id = id;
+        this. message = message;
     }
 
-    public String getChannel() {
-        return channel;
-    }
+    public void setId(String id) { this.id = id; }
 
     public String getMessage() {
         return message;
+    }
+
+    public String getId() {
+        return id;
     }
 }
